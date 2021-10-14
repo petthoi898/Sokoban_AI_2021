@@ -15,15 +15,19 @@ Options:
 
 `-l`：test1-10.txt, level1-5.txt
 `-m`：dfs or greedy
-example 1:
+Example 1:
 python sokoban.py -l test1.txt -m dfs
 runtime: 0.09 second
 rrUrdllluRRlldrrrUlllururrDLrullldRldrrUruLrdllldrrdrUlllurrurDluLrrdllldrrdrUU
-example 2:
+
+
+Example 2:
 python sokoban.py -l test2.txt -m dfs
 runtime: 0.00 second
 rrrUlldlUrrrUlldrrdllluU
-example 3:
+
+
+Example 3:
 python sokoban.py -l test3.txt -m dfs
 runtime: 0.34 second
 rrdldrdllDRlldlUrrrdrruLrdllLrrrululldRllldRlurrrdrruLrdllUrrdllLrrrullllldRRRlllurrrrrdLrulllllUdrrrrrdlLrrullllldrRRlllurrrrrdLrullluRldrrrdlLrrullllldrRRlllurrrrrdLrulllururulluLrrrdlddldrrrdlLrrullllldrRRlllurrrrrdLrulUlldrrrdlLrrullllldrRRlllurrrrrdLrulllurrUldrdrdlLrrullllldrRRlllurrrrrdLrulllurrululurrDDldldrrrdlLrrulllururDlldrdrruLrdllLrrrululldRllldRlurrrdLrrruLrdlllulldRRRlllurrurrdrdLrulL
