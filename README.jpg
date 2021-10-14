@@ -1,0 +1,41 @@
+
+
+Instructions:
+
+run the python files in following way
+(if haven't numpy please run pip: "pip install numpy" or "pip3 install numpy")
+
+python/python3 <python file name> <input file>
+
+(EX: python3 greendy.py test_1.txt)
+
+
+Proposed Heuristic:
+
+In this proposed heuristic the sum of the manhattan distances from initial position of the robot to the box , the manhattan distances from that box to the storage and the number of boxes filled.
+by this heuristic the robot may go the nearest box and then to the nearest storage. Through this heuristic it may give shortest path comparing to the manhattan heuristic. And it may give the 
+result in the shortest time comparing to the other algorithms.
+The results of the proposed heuristic is discussed below.
+
+ 
+
+ 
+#######################################################################################################################################################################################################
+
+test_case_one:
+OOOOOOOO
+O   OR O
+O    B O
+O   O  O
+OOOOOBSO
+    O SO
+    OOOO
+
+solution:
+Ket qua: 
+['PHAI', 'XUONG', 'XUONG', 'XUONG', 'XUONG', 'TRAI', 'LEN', 'PHAI', 'LEN', 'LEN', 'TRAI', 'TRAI', 'TRAI', 'LEN', 'TRAI', 'TRAI', 'XUONG', 'PHAI', 'PHAI', 'PHAI', 'PHAI', 'LEN', 'PHAI', 'XUONG', 'XUONG',
+ 'XUONG', 'TRAI', 'LEN', 'PHAI', 'LEN', 'TRAI', 'TRAI', 'TRAI', 'LEN', 'TRAI', 'TRAI', 'XUONG', 'PHAI', 'PHAI', 'PHAI', 'PHAI', 'LEN', 'PHAI', 'XUONG', 'XUONG']
+Tong thoi gian thuc hien: 
+0.65332124
+Tong so buoc :
+45

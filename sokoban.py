@@ -5,6 +5,17 @@ import collections
 import time
 import pygame
 from game import game
+import timeit
+
+robot=[]
+walls=[]#tuong
+storage=[]#kho
+box=[]#hop
+directions={}
+directions['U']=[0,-1]#len
+directions['R']=[1,0]#phai
+directions['L']=[-1,0]#trai
+directions['D']=[0,1]#xuong
 
 
 def getPosOfPlayer(gameState):
@@ -150,8 +161,10 @@ def dfs():
     actions = [[0]]
     visitedSet = set()
     result = []
+    maxSize = sys.getsizeof([startState])
     while front:
         node = front.pop() # [...,((2,1), ((4,2), (4,1), (5,3)))]
+        maxSize = maxSize - sys.getsizeof(node)
         nodeToAction = actions.pop() # get action
         if isEndState(node[-1][-1]): 
             result.append((','.join(nodeToAction[1:]).replace(',','')))
@@ -167,8 +180,197 @@ def dfs():
                 if isFailed(newPosOfBox): # checking special case
                     continue
                 front.append(node + [(newPosOfPlayer, newPosOfBox)])
+                maxSize += sys.getsizeof(node + [(newPosOfPlayer, newPosOfBox)])
                 actions.append(nodeToAction + [action[-1]])
-    return result
+    return (result, maxSize)
+
+
+
+
+
+# Hàm khoảng cách giữa box và storage
+def heuristic(box_ls,storage_ls):
+	distance=[]#lưu khoảng cách giữa box và storage
+	for h in box_ls:
+		dis_temp=[]
+		for s in storage_ls:
+			a=sum(abs(np.subtract(h,s)))#
+			dis_temp.append(a)
+		distance.append(min(dis_temp))
+	dis_value=sum(distance)
+	return dis_value
+#Hàm đọc file test
+def print_char(filename):
+	f = open(filename, 'r')
+	i=0
+	j=0
+	while True:
+		char=f.read(1)
+		temp=[]
+		if char: 
+			temp.append(i)
+			temp.append(j)
+			if char == "#":
+				walls.append(temp)
+			if char == "&":
+				robot.append(temp)
+			if char == ".":
+				storage.append(temp)
+			if char == "B":
+				box.append(temp)
+			if char == "X":
+				box.append(temp)
+				storage.append(temp)
+			if char == "$":
+				robot.append(temp)
+				storage.append(temp)
+			if char == "\n":
+				i=0
+				j=j+1
+			else:
+				i=i+1
+		else:
+			break
+
+
+#Hàm thuc hiên di chuyển các box
+
+def move(point,dir,path,temp_box_list,sizeo):
+	box_list=[]
+	box_list=temp_box_list[:]
+	temp_append=[]
+	cur_path=[]
+	cur_path=path[:]
+	cur_path.append(dir)
+	if point not in walls:
+		if point in box_list:
+			ind=box_list.index(point)
+			temp_box=[x + y for x, y in zip(point, directions[dir])]
+			if temp_box not in box_list and temp_box not in walls:
+				box_list[ind]=[x + y for x, y in zip(point, directions[dir])]
+				temp_append.append(point)
+				for i in box_list:
+					temp_append.append(i)
+				if temp_append not in visited:
+					counter=0
+					popped_robot=temp_append[0]
+					for k in visited:
+						k_temp_visited=k[:]
+						
+						k_robot=k_temp_visited.pop(0)
+						temporary=[]
+						if k_robot==popped_robot:
+							count_list=0
+							temporary=temp_append[1:]
+							for m in k_temp_visited:
+								if m in temporary:
+									count_list=count_list+1
+							if count_list==len(temporary):
+								counter=counter+1
+					if counter==0:
+						
+						temp_append.append(cur_path)
+						dis_append=heuristic(box_list,storage)
+						temp_append.append(dis_append)
+						queue.append(temp_append)
+				if set(map(tuple,box_list))==set(map(tuple,storage)):
+					#stop = timeit.default_timer()
+					#total_time=stop-start_time
+					# print("Ket qua: ")
+					# #print(cur_path)
+					# print("Tong thoi gian thuc hien: ")
+					# print(total_time)
+					# print("Tong so buoc :")
+					# print(len(cur_path))
+					# print("Maxsize =",sizeo,"byte")
+					return [cur_path, sizeo]
+		else:
+			temp_append.append(point)
+			for i in box_list:
+				temp_append.append(i)
+			if temp_append not in visited:
+				counter=0
+				popped_robot=temp_append[0]
+				for k in visited:
+					k_temp_visited=k[:]
+					count_list=0
+					k_robot=k_temp_visited.pop(0)
+					temporary=[]
+					if k_robot==popped_robot:
+						temporary=temp_append[1:]
+						for m in k_temp_visited:
+							if m in temporary:
+								count_list=count_list+1
+						if count_list==len(temporary):
+							counter=counter+1
+				if counter==0:
+					dis_append=heuristic(box_list,storage)
+					temp_append.append(cur_path)
+					temp_append.append(dis_append)
+					
+					queue.append(temp_append)
+			if set(map(tuple,box_list))==set(map(tuple,storage)):
+				# stop = timeit.default_timer()
+				# total_time=stop-start_time
+				# print("Ket qua: ")
+				# print(cur_path)
+				# print("none")
+				# print("Tong thoi gian thuc hien: ")
+				# print(total_time)
+				# print("Tong so buoc :")
+				# print(len(cur_path))
+				# print("Maxsize =",sizeo,"byte")
+				return [cur_path, sizeo]
+	return []
+
+#Hàm hiện thực giải thuât greedy
+def greedy():
+	maxsize=0
+	temp_queue=[]
+	initial=robot[0]
+	temp_queue.append(initial)
+	
+	for i in box:#chua list toa do box
+		temp_queue.append(i)
+	path=[]
+	temp_queue.append(path)
+	temp_queue.append(0)
+	
+	queue.append(temp_queue)
+	count=0
+	while queue:
+		temp_box_list=[]
+		visited_adding=[]
+		queue.sort(key=lambda x: x[-1])
+		robot_position_list=queue.pop(0)
+		
+		robot_position=robot_position_list[0]
+		visited_adding=robot_position_list[:-2]
+		if visited_adding not in visited:
+			visited.append(visited_adding)
+		temp_path=robot_position_list[-2][:]
+		temp_box_list=robot_position_list[1:-2]
+		N=[x + y for x, y in zip(robot_position, directions['U'])]
+		S=[x + y for x, y in zip(robot_position, directions['D'])]
+		E=[x + y for x, y in zip(robot_position, directions['R'])]
+		W=[x + y for x, y in zip(robot_position, directions['L'])]
+		maxsize = max(sys.getsizeof(queue),maxsize)
+		m1 = move(N,dir_N,temp_path,temp_box_list,maxsize)
+		if len(m1) != 0:
+			return m1
+		m2 = move(S,dir_S,temp_path,temp_box_list,maxsize)
+		if len(m2) != 0:
+			return m2
+		m3 = move(E,dir_E,temp_path,temp_box_list,maxsize)
+		if len(m3) != 0:
+			return m3
+		m4 = move(W,dir_W,temp_path,temp_box_list,maxsize)
+		if len(m4) != 0:
+			return m4
+		count=count+1
+		if not queue:
+			print("solution not found")
+			exit()
 
 
 
@@ -198,31 +400,6 @@ def print_game(matrix,screen):
         x = 0
         y = y + 32
 
-
-def get_key():
-  while 1:
-    event = pygame.event.poll()
-    if event.type == pygame.KEYDOWN:
-      return event.key
-    else:
-      pass
-
-def display_box(screen, message):
-  "Print a message in a box in the middle of the screen"
-  fontobject = pygame.font.Font(None,18)
-  pygame.draw.rect(screen, (0,0,0),
-                   ((screen.get_width() / 2) - 100,
-                    (screen.get_height() / 2) - 10,
-                    200,20), 0)
-  pygame.draw.rect(screen, (255,255,255),
-                   ((screen.get_width() / 2) - 102,
-                    (screen.get_height() / 2) - 12,
-                    204,24), 1)
-  if len(message) != 0:
-    screen.blit(fontobject.render(message, 1, (255,255,255)),
-                ((screen.get_width() / 2) - 100, (screen.get_height() / 2) - 10))
-  pygame.display.flip()
-
 def display_end(screen):
     message = "Level Completed"
     fontobject = pygame.font.Font(None,18)
@@ -238,36 +415,11 @@ def display_end(screen):
                 ((screen.get_width() / 2) - 100, (screen.get_height() / 2) - 10))
     pygame.display.flip()
 
-
-def ask(screen, question):
-  "ask(screen, question) -> answer"
-  pygame.font.init()
-  current_string = []
-  display_box(screen, question + ": " + "".join(current_string))
-  while 1:
-    inkey = get_key()
-    if inkey == pygame.K_BACKSPACE:
-      current_string = current_string[0:-1]
-    elif inkey == pygame.K_RETURN:
-      break
-    elif inkey == pygame.K_MINUS:
-      current_string.append("_")
-    elif inkey <= 127:
-      current_string.append(chr(inkey))
-    display_box(screen, question + ": " + "".join(current_string))
-  return "".join(current_string)
-
-def start_game():
-    start = pygame.display.set_mode((320,240))
-    level = int(ask(start,"Select Level"))
-    if level > 0:
-        return level
-    else:
-        print ("ERROR: Invalid Level: "+str(level))
-        sys.exit(2)
-
-
-
+def catString(res):
+    result = ''
+    for a in res:
+        result+=a
+    return result
 
 if __name__ == '__main__':
     layout, method, levels = readCommand(sys.argv[1:]).values()
@@ -278,11 +430,25 @@ if __name__ == '__main__':
     posWalls = getPosOfWall(gameState)
     # print(posGoals)
     # print(posWalls)
-    result = dfs()
+    if method == 'dfs':
+        result = dfs()
+        print(result[0])
+    elif method == 'greedy':
+        visited=[]
+        queue=[]
+        print_char('levels/'+levels)
+        dir_N='U'
+        dir_S='D'
+        dir_E='R'
+        dir_W='L'
+        result = greedy()
+        ret = catString(result[0])
+        result[0] = [ret]
     endTime = time.time()
-    print(result[0])
     print("runtime of %s: %.2f second." %(method, endTime - startTime))
-
+    print("maxSize: %.2f" %(result[1]))
+    print("How it work !? Waiting for the game finish")
+    # for init game scene
     wall = pygame.image.load('images/wall.png')
     floor = pygame.image.load('images/floor.png')
     box = pygame.image.load('images/box.png')
@@ -298,7 +464,6 @@ if __name__ == '__main__':
     size = game.load_size()
     screen = pygame.display.set_mode(size)
     #front = collections.q
-
     while 1:
         if game.is_completed(): 
             display_end(screen)
@@ -306,18 +471,7 @@ if __name__ == '__main__':
             sys.exit()
         print_game(game.get_matrix(),screen)
         pygame.time.delay(1000)
-        for event in result[0]: #pygame.event.get()
-            """
-            if event.type == pygame.QUIT: sys.exit(0)
-            elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_UP: game.move(0,-1, True)
-                elif event.key == pygame.K_DOWN: game.move(0,1, True)
-                elif event.key == pygame.K_LEFT: game.move(-1,0, True)
-                elif event.key == pygame.K_RIGHT: game.move(1,0, True)
-                elif event.key == pygame.K_q: sys.exit(0)
-                elif event.key == pygame.K_d: game.unmove()
-            """
-            #print(event)
+        for event in result[0][0]: #pygame.event.get()
             
             if event == 'u' or event == 'U': 
                 game.move(0, -1, True)
