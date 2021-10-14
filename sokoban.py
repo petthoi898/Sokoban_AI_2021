@@ -56,10 +56,10 @@ def readCommand(argv):
     options, _ = parser.parse_args(argv)
     with open('levels/'+options.levels,"r") as f: 
         layout = f.readlines()
-    args['layout'] = layout
-    args['method'] = options.agentMethod
-    args['level'] = options.levels
-    return args
+    args['layout'] = layout # using to init gameState
+    args['method'] = options.agentMethod #using for method to run
+    args['level'] = options.levels # using for init game
+    return args # 
 
 def isValidAction(action, posOfPlayer, posOfBox):
     """Check action of current player is valid or not? 
@@ -67,42 +67,42 @@ def isValidAction(action, posOfPlayer, posOfBox):
     xPlayer, yPlayer = posOfPlayer
 
     if action[-1].isupper(): # push a box
-        xAction, yAction = xPlayer + 2 * action[0], yPlayer + 2 * action[1]
+        xAction, yAction = xPlayer + 2 * action[0], yPlayer + 2 * action[1] # when push a box, it have to check the next of next action is a wall( or box ) or not ?
     else:
-        xAction, yAction = xPlayer + action[0], yPlayer + action[1]
+        xAction, yAction = xPlayer + action[0], yPlayer + action[1] # when player dosent push a box, just check the next of action is ?
     #print("xA, yA: " +str((xAction, yAction)) )
-    if ((xAction, yAction) in posOfBox + posWalls): return False
-    return True
-    #return (xAction, yAction) not in posOfBox + posWalls # check if there are two box or next box is a wall
+
+    return (xAction, yAction) not in posOfBox + posWalls # return position of next action not in (posBox + posWalls)
 
 
-def validAction(posOfPlayer, posOfBox):
+def validAction(posOfPlayer, posOfBox): 
     """Check action of current player is valid or not? and return all actions valid """
 
-    allActions = [[-1,0,'u','U'], [1,0,'d','D'],[0,-1,'l','L'],[0,1,'r', 'R']]
+    allActions = [[-1,0,'u','U'], [1,0,'d','D'],[0,-1,'l','L'],[0,1,'r', 'R']] # all actions can be run
     xPlayer, yPlayer = posOfPlayer
     legalActions = []
     for action in allActions:
-        xAction, yAction = xPlayer + action[0], yPlayer + action[1]
+        xAction, yAction = xPlayer + action[0], yPlayer + action[1] #  position of player after action
         if (xAction, yAction) in posOfBox: # push a box
-            action.pop(2)
+            action.pop(2) # drop lowwer letter
         else:
-            action.pop(3)
+            action.pop(3) # drop upper letter
         if isValidAction(action, posOfPlayer, posOfBox):
             legalActions.append(action)
         else: continue
     return tuple(tuple(x) for x in legalActions) # ((-1,0,'u'), (1,0,'D',))
 
 def updateState(action, posOfPlayer, posOfBox):
-    xPlayer, yPlayer = posOfPlayer
+    """this function update state of player after run action"""
+    xPlayer, yPlayer = posOfPlayer # previous position of player
     #print("previous: " + str(posOfPlayer))
-    newPosOfPlayer = [xPlayer + action[0], yPlayer + action[1]]
+    newPosOfPlayer = [xPlayer + action[0], yPlayer + action[1]] # new position of player
     posOfBox = [list(x) for x in posOfBox]
     if action[-1].isupper(): # if push a box, box will be change then remove old pos and append new pos, new pos = newposplayer + action
-        posOfBox.remove(newPosOfPlayer)
-        posOfBox.append([xPlayer + 2*action[0], yPlayer + 2*action[1]])
-    posOfBox = tuple(tuple(x) for x in posOfBox)
-    newPosOfPlayer = tuple(newPosOfPlayer)
+        posOfBox.remove(newPosOfPlayer) # remove old pos of box
+        posOfBox.append([xPlayer + 2*action[0], yPlayer + 2*action[1]]) # add new pos of Box
+    posOfBox = tuple(tuple(x) for x in posOfBox) # overloading to tuple to "dong bo"
+    newPosOfPlayer = tuple(newPosOfPlayer) # tra ve tuple de dong bo
     return newPosOfPlayer, posOfBox # (),()
 
 def isFailed(posBox): 
@@ -146,14 +146,14 @@ def dfs():
     beginBox =  getPosOfBox(gameState)
     beginPlayer = getPosOfPlayer(gameState)
     startState = (beginPlayer, beginBox) # ((2,1), ((4,3), (5,2)))
-    front = collections.deque([[startState]])
+    front = collections.deque([[startState]]) # queue
     actions = [[0]]
     visitedSet = set()
     result = []
     while front:
         node = front.pop() # [...,((2,1), ((4,2), (4,1), (5,3)))]
-        nodeToAction = actions.pop()
-        if isEndState(node[-1][-1]):
+        nodeToAction = actions.pop() # get action
+        if isEndState(node[-1][-1]): 
             result.append((','.join(nodeToAction[1:]).replace(',','')))
             break
         if node[-1] not in visitedSet:
@@ -280,7 +280,7 @@ if __name__ == '__main__':
     # print(posWalls)
     result = dfs()
     endTime = time.time()
-    print(result)
+    print(result[0])
     print("runtime of %s: %.2f second." %(method, endTime - startTime))
 
     wall = pygame.image.load('images/wall.png')
@@ -305,6 +305,7 @@ if __name__ == '__main__':
             pygame.quit()
             sys.exit()
         print_game(game.get_matrix(),screen)
+        pygame.time.delay(1000)
         for event in result[0]: #pygame.event.get()
             """
             if event.type == pygame.QUIT: sys.exit(0)
@@ -317,6 +318,7 @@ if __name__ == '__main__':
                 elif event.key == pygame.K_d: game.unmove()
             """
             #print(event)
+            
             if event == 'u' or event == 'U': 
                 game.move(0, -1, True)
                 print_game(game.get_matrix(),screen)
