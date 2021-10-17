@@ -1,20 +1,3 @@
-
-```
-$ python sokoban.py --help
-```
-```
-Usage: sokoban.py [options]
-
-Options:
-  -h, --help            show this help message and exit
-  -l SOKOBANLEVELS, --level=SOKOBANLEVELS
-                        level of game to play (test1-10.txt, level1-5.txt)
-  -m AGENTMETHOD, --method=AGENTMETHOD
-                        research method (bfs, dfs, ucs, astar)
-```
-
-`-l`：test1-10.txt, level1-5.txt
-`-m`：dfs or greedy
 Example 1:
 python sokoban.py -l test1.txt -m dfs
 runtime: 0.09 second

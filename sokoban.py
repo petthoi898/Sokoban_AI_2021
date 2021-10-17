@@ -5,7 +5,7 @@ import collections
 import time
 import pygame
 from game import game
-import timeit
+
 
 robot=[]
 walls=[]#tuong
@@ -161,16 +161,14 @@ def dfs():
     actions = [[0]]
     visitedSet = set()
     result = []
-    maxSize = sys.getsizeof([startState])
+    maxSize = sys.getsizeof([startState]) # to find maxSize
     while front:
         node = front.pop() # [...,((2,1), ((4,2), (4,1), (5,3)))]
-        maxSize = maxSize - sys.getsizeof(node)
         nodeToAction = actions.pop() # get action
-        if isEndState(node[-1][-1]): 
+        if isEndState(node[-1][-1]):  # if return true it is completed and break 
             result.append((','.join(nodeToAction[1:]).replace(',','')))
             break
-        if node[-1] not in visitedSet:
-            #print(node[-1])
+        if node[-1] not in visitedSet: # node[-1] current position of box, if this state is not in visitedSet add them to visitedSet
             visitedSet.add(node[-1]) # node[-1] is a tuple of posPlayer, posBoxs
             #print(validAction(node[-1][0], node[-1][-1]))
             for action in validAction(node[-1][0], node[-1][1]):
@@ -179,9 +177,9 @@ def dfs():
                 # print(newPosOfBox)
                 if isFailed(newPosOfBox): # checking special case
                     continue
-                front.append(node + [(newPosOfPlayer, newPosOfBox)])
-                maxSize += sys.getsizeof(node + [(newPosOfPlayer, newPosOfBox)])
-                actions.append(nodeToAction + [action[-1]])
+                front.append(node + [(newPosOfPlayer, newPosOfBox)]) # append new state
+                maxSize = max(sys.getsizeof(node + [(newPosOfPlayer, newPosOfBox)]), maxSize)
+                actions.append(nodeToAction + [action[-1]])  #add actions
     return (result, maxSize)
 
 
@@ -444,6 +442,7 @@ if __name__ == '__main__':
         result = greedy()
         ret = catString(result[0])
         result[0] = [ret]
+        print(result[0])
     endTime = time.time()
     print("runtime of %s: %.2f second." %(method, endTime - startTime))
     print("maxSize: %.2f" %(result[1]))
